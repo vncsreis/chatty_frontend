@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { rooms } from '$stores/rooms';
+	import { onMount } from 'svelte';
 
 	onMount(async () => {
 		let newRooms = await (await fetch('http://127.0.0.1:3000/room')).json();
@@ -14,8 +14,10 @@
 	<ul class="mt-12">
 		{#each $rooms as room (room.id)}
 			<li class="text-2xl">
-				<a href={`/room/${room.id}`}>
-					{room.name}&nbsp;|&nbsp;
+				<a href={`/room/${room.id}`} class="flex flex-col items-center">
+					<span>
+						{room.name}
+					</span>
 					<span class="text-orange-600 cursor-pointer text-sm">{room.id}</span></a
 				>
 			</li>
