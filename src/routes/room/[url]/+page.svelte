@@ -1,11 +1,10 @@
 <script lang="ts">
-	import type { Message } from '$models/message';
-	import { page } from '$app/stores';
-	import { rooms } from '$stores/rooms';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import type { Message } from '$models/message';
 	import type { Room } from '$models/room';
 	import { onDestroy, onMount } from 'svelte';
-	import { browser } from '$app/environment';
 	import { v4 } from 'uuid';
 
 	let { url } = $page.params;
@@ -49,13 +48,17 @@
 					open = false;
 				});
 			} catch (e) {
-				// console.log(e);
+				goto('/404');
 			}
 		}
 	});
 
 	onDestroy(() => {
-		ws.close();
+		try {
+			ws.close();
+		} catch (e) {
+			goto('/404');
+		}
 	});
 
 	function handleSendMessage(text: string, user: string) {
@@ -90,11 +93,18 @@
 	>
 		{#if messages.length > 0}
 			{#each messages as message (message.id)}
-				<div class="w-full flex hover:bg-gray-100">
-					<span class="text-gray-400">{message.sender}&nbsp;|&nbsp;</span>
-					<p class="text-lg">{message.text}</p>
-					<p class="text-gray-400 ml-auto">{new Date(message.time).toLocaleTimeString()}</p>
-				</div>
+				{#if message.sender === 'SERVER'}
+					<div class="w-full flex hover:bg-gray-100">
+						<p class="text-gray-400 text-lg">{message.text}</p>
+						<p class="text-gray-400 ml-auto">{new Date(message.time).toLocaleTimeString()}</p>
+					</div>
+				{:else}
+					<div class="w-full flex hover:bg-gray-100">
+						<span class="text-gray-400">{message.sender}&nbsp;|&nbsp;</span>
+						<p class="text-lg">{message.text}</p>
+						<p class="text-gray-400 ml-auto">{new Date(message.time).toLocaleTimeString()}</p>
+					</div>
+				{/if}
 			{/each}
 		{:else if loggedUsername === ''}
 			<p>Please login to chat</p>
